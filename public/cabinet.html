@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АНОН-ЧАТ - Личный кабинет</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px 20px;
+            min-height: 300px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .profile-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .profile-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .profile-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .subscription-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subscription-status {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subscription-expires {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .user-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .user-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-id {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .user-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #e8d4f8;
+            color: #764ba2;
+        }
+
+        .user-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-small:hover {
+            background: #5568d3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-save {
+            background: #667eea;
+            color: white;
+        }
+
+        .admin-only {
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>АНОН-ЧАТ</h1>
+            <p>Личный кабинет</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="profile">Профиль</button>
+            <button class="tab-btn" data-tab="subscription">Подписка</button>
+            <button class="tab-btn admin-only" data-tab="admin">Админ</button>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div class="tab-content active" id="profile-tab">
+            <div class="alert alert-info">👤 Ваша информация профиля</div>
+
+            <div id="profileContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка данных...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBSCRIPTION TAB -->
+        <div class="tab-content" id="subscription-tab">
+            <div id="subscriptionContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка подписки...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div class="tab-content" id="admin-tab">
+            <div class="alert alert-info">👑 Панель администратора</div>
+            <div id="adminContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Загрузка пользователей...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT SUBSCRIPTION MODAL -->
+    <div class="modal" id="editSubModal">
+        <div class="modal-content">
+            <div class="modal-header">✏️ Изменить подписку</div>
+            <form id="editSubForm">
+                <div class="form-group">
+                    <label class="form-label">Тариф</label>
+                    <select class="form-select" id="tierSelect" required>
+                        <option value="">-- Выберите --</option>
+                        <option value="free">Free</option>
+                        <option value="premium_1month">Premium 1 месяц</option>
+                        <option value="premium_3month">Premium 3 месяца</option>
+                        <option value="premium_6month">Premium 6 месяцев</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Дни действия</label>
+                    <input type="number" class="form-input" id="daysInput" min="0" value="30" placeholder="30">
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn-save">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabs();
+            loadUserData();
+        });
+
+        function initTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            document.querySelector('[data-tab="' + tabName + '"]').classList.add('active');
+
+            if (tabName === 'subscription') {
+                loadSubscription();
+            } else if (tabName === 'admin') {
+                loadAdminUsers();
+            }
+        }
+
+        // Get Telegram user ID from URL or local storage
+        function getTelegramUserId() {
+            const params = new URLSearchParams(window.location.search);
+            let userId = params.get('userId');
+
+            if (!userId) {
+                userId = localStorage.getItem('telegramUserId');
+            }
+
+            if (!userId && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+                userId = window.Telegram.WebApp.initDataUnsafe.user?.id;
+            }
+
+            return userId;
+        }
+
+        async function loadUserData() {
+            try {
+                const userId = getTelegramUserId();
+
+                if (!userId) {
+                    showProfile({
+                        userId: 'demo',
+                        firstName: 'Demo',
+                        username: 'demouser',
+                        role: 'user',
+                        createdAt: new Date().toISOString()
+                    });
+                    return;
+                }
+
+                const response = await fetch(`/api/profile/${userId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.ok) {
+                        currentUser = data.user;
+                        showProfile(data.user);
+
+                        // Show admin tab if admin
+                        if (data.user.role === 'admin') {
+                            document.querySelector('.admin-only').style.display = 'block';
+                        }
+                    }
+                } else {
+                    showProfile({
+                        userId: userId || 'unknown',
+                        firstName: 'User',
+                        username: 'user',
+                        role: 'user',
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                showProfile({
+                    userId: 'error',
+                    firstName: 'Error',
+                    username: 'error',
+                    role: 'user',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        }
+
+        function showProfile(user) {
+            const content = document.getElementById('profileContent');
+            const createdDate = new Date(user.createdAt).toLocaleDateString('ru-RU');
+
+            content.innerHTML = `
+                <div class="profile-item">
+                    <div class="profile-label">ID</div>
+                    <div class="profile-value">${user.userId}</div>
+                </div>
+                <div class="profile-item">
+                    <div class="profile-label">Имя</div>
+                    <div class="profile-value">${user.firstName || '-'}</div>
+                </div>
+                <div class="profile-item">
+                    <div class="profile-label">Никнейм</div>
+                    <div class="profile-value">@${user.username || '-'}</div>
+                </div>
+                <div class="profile-item">
+                    <div class="profile-label">Статус</div>
+                    <div class="profile-value">${user.role === 'admin' ? '👑 Администратор' : 'Пользователь'}</div>
+                </div>
+                <div class="profile-item">
+                    <div class="profile-label">Регистрация</div>
+                    <div class="profile-value">${createdDate}</div>
+                </div>
+            `;
+        }
+
+        async function loadSubscription() {
+            try {
+                const userId = getTelegramUserId() || 'demo';
+                const response = await fetch(`/api/subscription/${userId}`);
+
+                let subscriptionHTML = `
+                    <div class="subscription-card">
+                        <h3>Текущий тариф</h3>
+                        <div class="subscription-status">PREMIUM</div>
+                        <div class="subscription-expires">Активная подписка</div>
+                    </div>
+                `;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.ok && data.subscription) {
+                        const sub = data.subscription;
+                        const tierNames = {
+                            'free': 'FREE',
+                            'premium_1month': 'PREMIUM (1 месяц)',
+                            'premium_3month': 'PREMIUM (3 месяца)',
+                            'premium_6month': 'PREMIUM (6 месяцев)'
+                        };
+
+                        subscriptionHTML = `
+                            <div class="subscription-card">
+                                <h3>Текущий тариф</h3>
+                                <div class="subscription-status">${tierNames[sub.tier] || 'FREE'}</div>
+                                <div class="subscription-expires">
+                                    ${sub.expiresAt ? `Действует до: ${new Date(sub.expiresAt).toLocaleDateString('ru-RU')}` : 'Бесплатный план'}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                subscriptionHTML += `
+                    <h3 style="margin: 20px 0 15px 0; font-size: 16px;">Доступные тарифы</h3>
+                    <button class="btn btn-primary" onclick="alert('💳 Интеграция платежей в разработке')">1 месяц - $2.99</button>
+                    <button class="btn btn-primary" onclick="alert('💳 Интеграция платежей в разработке')">3 месяца - $7.99</button>
+                    <button class="btn btn-primary" onclick="alert('💳 Интеграция платежей в разработке')">6 месяцев - $14.99</button>
+                `;
+
+                document.getElementById('subscriptionContent').innerHTML = subscriptionHTML;
+            } catch (error) {
+                console.error('Error loading subscription:', error);
+                document.getElementById('subscriptionContent').innerHTML = '<div class="alert alert-info">Ошибка загрузки подписки</div>';
+            }
+        }
+
+        async function loadAdminUsers() {
+            try {
+                const userId = getTelegramUserId();
+                if (!userId) {
+                    document.getElementById('adminContent').innerHTML = '<div class="alert alert-info">Требуется авторизация через Telegram</div>';
+                    return;
+                }
+
+                const response = await fetch(`/api/admin/users?adminId=${userId}`);
+                if (!response.ok) {
+                    document.getElementById('adminContent').innerHTML = '<div class="alert alert-info">❌ Доступ запрещен (только для админов)</div>';
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.ok && data.users) {
+                    const usersHTML = data.users.map(user => `
+                        <div class="user-item">
+                            <div class="user-item-header">
+                                <div>
+                                    <div class="user-name">${user.firstName || 'Unknown'} ${user.lastName || ''}</div>
+                                    <div class="user-id">ID: ${user.userId}</div>
+                                </div>
+                                <div class="user-status">${user.tier || 'FREE'}</div>
+                            </div>
+                            <div class="user-controls">
+                                <button class="btn-small" onclick="openEditModal(${user.userId})">✏️ Тариф</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    document.getElementById('adminContent').innerHTML = `
+                        <div style="margin-bottom: 15px;">
+                            <strong>Всего пользователей: ${data.users.length}</strong>
+                        </div>
+                        ${usersHTML}
+                    `;
+                } else {
+                    document.getElementById('adminContent').innerHTML = '<div class="alert alert-info">Нет пользователей</div>';
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('adminContent').innerHTML = '<div class="alert alert-info">❌ Ошибка загрузки: ' + error.message + '</div>';
+            }
+        }
+
+        function openEditModal(userId) {
+            document.getElementById('editSubModal').classList.add('active');
+            document.getElementById('editSubForm').dataset.userId = userId;
+        }
+
+        function closeModal() {
+            document.getElementById('editSubModal').classList.remove('active');
+        }
+
+        document.getElementById('editSubForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const userId = parseInt(this.dataset.userId);
+            const tier = document.getElementById('tierSelect').value;
+            const daysValid = parseInt(document.getElementById('daysInput').value) || 30;
+            const adminId = getTelegramUserId();
+
+            if (!tier) {
+                alert('Выберите тариф');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/update-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        adminId: adminId,
+                        userId: userId,
+                        tier: tier,
+                        daysValid: daysValid
+                    })
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    alert('✅ Подписка обновлена!');
+                    closeModal();
+                    loadAdminUsers();
+                } else {
+                    alert('❌ Ошибка: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Ошибка: ' + error.message);
+            }
+        });
+
+        document.getElementById('editSubModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

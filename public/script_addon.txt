@@ -1,0 +1,29 @@
+
+
+// ==================== PERSONAL CABINET ====================
+
+// Add Cabinet button
+function addCabinetButton() {
+  const cabinetBtn = document.createElement('button');
+  cabinetBtn.id = 'cabinetBtn';
+  cabinetBtn.className = 'settings-btn';
+  cabinetBtn.style.right = '70px';
+  cabinetBtn.innerHTML = '👤 КАБИНЕТ';
+  cabinetBtn.onclick = openCabinet;
+  document.body.appendChild(cabinetBtn);
+  console.log('Cabinet button added');
+}
+
+// Open cabinet
+function openCabinet() {
+  const cabinetUrl = '/cabinet.html';
+
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.openLink(cabinetUrl);
+  } else {
+    window.open(cabinetUrl, '_blank');
+  }
+}
+
+// Add button after page loads
+setTimeout(addCabinetButton, 1000);

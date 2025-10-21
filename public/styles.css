@@ -1,0 +1,60 @@
+:root{
+  --bg:#0b0f15; --bg-soft:#0f1520; --surface:rgba(255,255,255,.06); --surface-2:rgba(255,255,255,.12);
+  --text:#e6eefc; --muted:#9fb0c3; --primary:#7ab8ff; --accent:#b28dff;
+  --radius:16px; --blur:14px; --shadow:0 10px 40px rgba(0,0,0,.35); --ring:rgba(122,184,255,.6);
+}
+@media(prefers-color-scheme:light){
+  :root{ --bg:#f7f9fc; --bg-soft:#eef3fb; --surface:rgba(255,255,255,.7); --surface-2:rgba(0,0,0,.06);
+  --text:#0b1220; --muted:#3f5875; --primary:#1769ff; --accent:#6b42ff; --ring:rgba(23,105,255,.25); }
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0; font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial;
+  color:var(--text); background:var(--bg); overflow-x:hidden}
+.bg{position:fixed; inset:0; z-index:-1; overflow:hidden}
+.bg .grid{position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);
+  background-size:22px 22px; mask:radial-gradient(circle at 50% 30%,rgba(0,0,0,.8),transparent 60%)}
+.blob{position:absolute; width:60vmax; height:60vmax; filter:blur(60px); opacity:.8; animation:float 26s ease-in-out infinite}
+.blob-1{top:-10vmax; left:-10vmax; background:radial-gradient(circle at 30% 30%, var(--accent), transparent 40%), radial-gradient(circle at 70% 70%, var(--primary), transparent 40%); mix-blend-mode:screen}
+.blob-2{bottom:-20vmax; right:-10vmax; background:radial-gradient(circle at 20% 80%, #24d6ff, transparent 40%), radial-gradient(circle at 80% 20%, #ff6bd6, transparent 40%); mix-blend-mode:screen; animation-delay:-8s}
+@keyframes float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-20px,0)}}
+.site-header{position:sticky; top:0; display:flex; justify-content:space-between; align-items:center;
+  padding:12px 20px; backdrop-filter:saturate(1.2) blur(16px); background:linear-gradient(to bottom, rgba(10,14,22,.7), transparent)}
+.logo{display:flex; align-items:center; gap:10px; font-weight:700; text-transform:lowercase; letter-spacing:.5px}
+.logo img{height:28px}
+.nav{display:flex; gap:16px}
+.nav a{color:var(--muted); text-decoration:none; padding:8px 10px; border-radius:12px}
+.nav a:hover{background:var(--surface-2); color:var(--text)} .nav .pill{background:var(--surface-2); color:var(--text)}
+.icon-btn{background:transparent; border:0; padding:8px; border-radius:12px; cursor:pointer}
+.icon-btn:hover{background:var(--surface-2)}
+.hero{display:grid; place-items:center; padding:80px 20px 40px}
+.card.glass{width:min(980px,92vw); background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.12); border-radius:var(--radius); box-shadow:var(--shadow); backdrop-filter:blur(var(--blur)) saturate(1.2); padding:24px}
+.profile{display:flex; gap:24px; align-items:center}
+.avatar-wrap{position:relative; width:92px; height:92px; display:grid; place-items:center}
+.avatar{width:76px; height:76px; border-radius:50%; background:linear-gradient(135deg,#fff,#dfe8ff); box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.pulse{position:absolute; width:92px; height:92px; border-radius:50%; box-shadow:0 0 0 0 var(--ring); animation:pulse 2.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--ring); transform:scale(.98)}70%{box-shadow:0 0 0 20px rgba(0,0,0,0); transform:scale(1)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.meta h1{margin:0 0 6px 0; font-size:28px} .sub{margin:0; color:var(--muted); max-width:58ch}
+.actions{display:flex; gap:12px; margin-top:16px}
+.btn{position:relative; display:inline-flex; gap:8px; align-items:center; justify-content:center; padding:12px 18px; border-radius:14px;
+  border:1px solid transparent; cursor:pointer; user-select:none; font-weight:600; transition:.2s transform; background:var(--surface-2); color:var(--text)}
+.btn.primary{background:linear-gradient(180deg, var(--primary), #3b82f6); color:#fff; box-shadow:0 8px 24px rgba(59,130,246,.4)}
+.btn.ghost{background:transparent; border-color:var(--surface-2)} .btn:active{transform:translateY(1px)}
+.btn .ripple{position:absolute; border-radius:50%; transform:scale(0); animation:ripple .6s linear; background:rgba(255,255,255,.45); mix-blend-mode:overlay}
+@keyframes ripple{to{transform:scale(12); opacity:0}}
+.stats{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.chip{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:999px; color:var(--muted)}
+.chip img{width:16px; height:16px}
+.features,.screens,.install{padding:40px 20px}
+.features h2,.screens h2,.install h2{ text-align:center; margin:8px 0 24px }
+.profile-demo{width:min(800px,92vw); margin:0 auto; display:flex; gap:20px; align-items:center; padding:16px 18px}
+.avatar-lg{position:relative; width:112px; height:112px; display:grid; place-items:center}
+.avatar-lg img{width:96px; height:96px; border-radius:50%; background:linear-gradient(135deg,#fff,#dfe8ff)}
+.avatar-lg .ring{position:absolute; inset:-10px; border-radius:50%; border:2px dashed rgba(255,255,255,.3); animation:spin 12s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.steps{width:min(840px,92vw); margin:0 auto; color:var(--muted)}
+.site-footer{padding:40px 20px; text-align:center; color:var(--muted)}
+.reveal{opacity:0; transform:translateY(12px); transition:opacity .6s ease, transform .6s ease}
+.reveal.visible{opacity:1; transform:translateY(0)}
+.reveal-delay{opacity:0; transform:translateY(6px); transition:opacity .8s ease .2s, transform .8s ease .2s}
+@media(max-width:720px){ .profile{flex-direction:column; text-align:center} .nav{display:none} }

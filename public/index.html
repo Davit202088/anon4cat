@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Анон Чат</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', 'Roboto', sans-serif;
+        background: #0a0e27;
+        background-image:
+          linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 50% 50%, rgba(0, 242, 254, 0.05) 0%, transparent 50%);
+        animation: pulse-bg 8s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      @keyframes pulse-bg {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.1); }
+      }
+
+      .settings-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(10, 14, 39, 0.8);
+        color: #00f2fe;
+        border: 2px solid #00f2fe;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1000;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+      }
+
+      .settings-btn:hover {
+        background: rgba(0, 242, 254, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 0 30px rgba(0, 242, 254, 0.6);
+      }
+
+      .container {
+        max-width: 450px;
+        width: 100%;
+        background: rgba(10, 14, 39, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow:
+          0 0 50px rgba(0, 242, 254, 0.2),
+          inset 0 0 50px rgba(0, 242, 254, 0.05);
+        border: 2px solid rgba(0, 242, 254, 0.3);
+        position: relative;
+        z-index: 1;
+      }
+
+      .swipe-area {
+        cursor: grab;
+        user-select: none;
+        transition: transform 0.3s ease;
+      }
+
+      .swipe-area:active {
+        cursor: grabbing;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-align: center;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: #00f2fe;
+        text-shadow:
+          0 0 10px rgba(0, 242, 254, 0.8),
+          0 0 20px rgba(0, 242, 254, 0.6),
+          0 0 30px rgba(0, 242, 254, 0.4);
+        animation: neon-flicker 3s infinite;
+      }
+
+      @keyframes neon-flicker {
+        0%, 100% { opacity: 1; }
+        90% { opacity: 0.95; }
+        92% { opacity: 1; }
+        94% { opacity: 0.95; }
+        96% { opacity: 1; }
+      }
+
+      .subtitle {
+        text-align: center;
+        opacity: 0.7;
+        margin-bottom: 40px;
+        font-size: 0.9rem;
+        color: #a0a8ff;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .status {
+        text-align: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(0, 242, 254, 0.4);
+        color: #00f2fe;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow:
+          0 0 20px rgba(0, 242, 254, 0.2),
+          inset 0 0 20px rgba(0, 242, 254, 0.05);
+      }
+
+      .swipe-hint {
+        text-align: center;
+        font-size: 0.85rem;
+        opacity: 0.7;
+        margin-top: 10px;
+        font-style: italic;
+      }
+
+      .buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      button {
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: 2px solid rgba(0, 242, 254, 0.6);
+        border-radius: 8px;
+        padding: 18px 24px;
+        font-size: 1.15rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.3), transparent);
+        transition: left 0.5s;
+      }
+
+      button:hover::before {
+        left: 100%;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 30px rgba(0, 242, 254, 0.6);
+        border-color: #00f2fe;
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      #findBtn {
+        background: rgba(0, 242, 254, 0.1);
+        border: 2px solid #00f2fe;
+        color: #00f2fe;
+        box-shadow:
+          0 0 20px rgba(0, 242, 254, 0.3),
+          inset 0 0 20px rgba(0, 242, 254, 0.1);
+      }
+
+      #findBtn:hover {
+        background: rgba(0, 242, 254, 0.2);
+        box-shadow:
+          0 0 40px rgba(0, 242, 254, 0.6),
+          inset 0 0 30px rgba(0, 242, 254, 0.2);
+      }
+
+      #leaveBtn {
+        background: rgba(255, 0, 255, 0.1);
+        border: 2px solid #ff00ff;
+        color: #ff00ff;
+        box-shadow:
+          0 0 20px rgba(255, 0, 255, 0.3),
+          inset 0 0 20px rgba(255, 0, 255, 0.1);
+      }
+
+      #leaveBtn:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow:
+          0 0 40px rgba(255, 0, 255, 0.6),
+          inset 0 0 30px rgba(255, 0, 255, 0.2);
+        border-color: #ff00ff;
+      }
+
+      #nextBtn {
+        background: rgba(0, 242, 254, 0.1);
+        border: 2px solid #00f2fe;
+        color: #00f2fe;
+        box-shadow:
+          0 0 20px rgba(0, 242, 254, 0.3),
+          inset 0 0 20px rgba(0, 242, 254, 0.1);
+      }
+
+      #nextBtn:hover {
+        background: rgba(0, 242, 254, 0.2);
+        box-shadow:
+          0 0 40px rgba(0, 242, 254, 0.6),
+          inset 0 0 30px rgba(0, 242, 254, 0.2);
+        border-color: #00f2fe;
+      }
+
+      #muteBtn {
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(160, 168, 255, 0.5);
+        color: #a0a8ff;
+      }
+
+      #muteBtn:hover {
+        background: rgba(160, 168, 255, 0.1);
+        border-color: #a0a8ff;
+        box-shadow: 0 0 30px rgba(160, 168, 255, 0.4);
+      }
+
+      #muteBtn.muted {
+        background: rgba(255, 0, 255, 0.1);
+        border: 2px solid #ff00ff;
+        color: #ff00ff;
+        box-shadow:
+          0 0 20px rgba(255, 0, 255, 0.4),
+          inset 0 0 20px rgba(255, 0, 255, 0.1);
+      }
+
+      audio {
+        display: none;
+      }
+
+      .emoji {
+        font-size: 1.4em;
+      }
+
+      .info {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0, 242, 254, 0.2);
+        font-size: 0.85rem;
+        opacity: 0.6;
+        line-height: 1.6;
+        color: #a0a8ff;
+      }
+
+      .swipe-hint {
+        color: #a0a8ff;
+        opacity: 0.5;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .status.searching {
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+      }
+
+      .modal.active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      .modal-content {
+        background: rgba(10, 14, 39, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 15px;
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow:
+          0 0 60px rgba(0, 242, 254, 0.3),
+          inset 0 0 60px rgba(0, 242, 254, 0.05);
+        border: 2px solid rgba(0, 242, 254, 0.4);
+        position: relative;
+        animation: slideUp 0.3s ease;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .modal-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #00f2fe;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow:
+          0 0 10px rgba(0, 242, 254, 0.8),
+          0 0 20px rgba(0, 242, 254, 0.4);
+      }
+
+      .close-btn {
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid #ff00ff;
+        color: #ff00ff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+      }
+
+      .close-btn:hover {
+        background: rgba(255, 0, 255, 0.2);
+        transform: rotate(90deg);
+        box-shadow: 0 0 30px rgba(255, 0, 255, 0.6);
+      }
+
+      .settings-section {
+        margin-bottom: 30px;
+      }
+
+      .settings-section h3 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: #a0a8ff;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .setting-item {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid rgba(0, 242, 254, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .setting-item:hover {
+        border-color: rgba(0, 242, 254, 0.4);
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+      }
+
+      .setting-item label {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #fff;
+      }
+
+      .setting-item input[type="text"],
+      .setting-item input[type="file"],
+      .setting-item select {
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(0, 242, 254, 0.4);
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: #00f2fe;
+        font-size: 1rem;
+        max-width: 200px;
+        width: 100%;
+        transition: all 0.3s ease;
+      }
+
+      .setting-item input[type="text"]:focus,
+      .setting-item select:focus {
+        outline: none;
+        border-color: #00f2fe;
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+      }
+
+      .setting-item input[type="text"]::placeholder {
+        color: rgba(0, 242, 254, 0.4);
+      }
+
+      .setting-item input[type="checkbox"] {
+        width: 50px;
+        height: 26px;
+        appearance: none;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(0, 242, 254, 0.3);
+        border-radius: 20px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .setting-item input[type="checkbox"]:checked {
+        background: rgba(0, 242, 254, 0.2);
+        border-color: #00f2fe;
+        box-shadow:
+          0 0 15px rgba(0, 242, 254, 0.5),
+          inset 0 0 15px rgba(0, 242, 254, 0.2);
+      }
+
+      .setting-item input[type="checkbox"]::before {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #a0a8ff;
+        top: 2px;
+        left: 2px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .setting-item input[type="checkbox"]:checked::before {
+        left: 26px;
+        background: #00f2fe;
+        box-shadow:
+          0 0 10px rgba(0, 242, 254, 0.8),
+          0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .locked-feature {
+        opacity: 0.5;
+        position: relative;
+      }
+
+      .locked-feature::after {
+        content: '🔒 PREMIUM';
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 0, 255, 0.2);
+        border: 1px solid #ff00ff;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #ff00ff;
+        pointer-events: none;
+        text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+      }
+
+      .locked-feature select,
+      .locked-feature input {
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      .save-btn {
+        background: rgba(0, 242, 254, 0.1);
+        border: 2px solid #00f2fe;
+        color: #00f2fe;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow:
+          0 0 20px rgba(0, 242, 254, 0.3),
+          inset 0 0 20px rgba(0, 242, 254, 0.1);
+      }
+
+      .save-btn:hover {
+        background: rgba(0, 242, 254, 0.2);
+        transform: translateY(-2px);
+        box-shadow:
+          0 0 40px rgba(0, 242, 254, 0.6),
+          inset 0 0 30px rgba(0, 242, 254, 0.2);
+      }
+
+      .premium-badge {
+        display: inline-block;
+        background: rgba(255, 0, 255, 0.2);
+        border: 1px solid #ff00ff;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-left: 10px;
+        text-transform: uppercase;
+        color: #ff00ff;
+        text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 30px 20px;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        button {
+          padding: 16px 20px;
+          font-size: 1rem;
+        }
+
+        .modal-content {
+          padding: 25px;
+        }
+
+        .settings-btn {
+          top: 10px;
+          right: 10px;
+          padding: 10px 15px;
+          font-size: 0.9rem;
+        }
+
+        .setting-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .setting-item input[type="text"],
+        .setting-item select {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="settings-btn" id="settingsBtn">
+      ⚙ Настройки
+    </button>
+    <button class="settings-btn" id="cabinetBtn" style="right: 70px;">👤 КАБИНЕТ</button>
+
+    <!-- User Status Badge -->
+    <div id="userStatusBadge" style="position: fixed; top: 20px; left: 20px; background: rgba(10, 14, 39, 0.8); padding: 10px 15px; border-radius: 8px; border: 2px solid #00f2fe; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); z-index: 1000; display: none;">
+      <span id="userStatusText" style="color: #00f2fe; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;"></span>
+    </div>
+
+    <div class="container">
+      <div class="swipe-area" id="swipeArea">
+        <h1>АНОН-ЧАТ</h1>
+        <p class="subtitle">Анонимный голосовой чат</p>
+
+        <div class="status" id="status">>> НАЖИМАЙТЕ СТАРТ </div>
+
+        <div class="buttons">
+          <button id="findBtn">
+            → НАЙТИ СОБЕСЕДНИКА
+          </button>
+          <button id="nextBtn" style="display:none;">
+            ⏭ СЛЕДУЮЩИЙ
+          </button>
+          <button id="muteBtn" style="display:none;">
+            🔊 МИК ВЫКЛ
+          </button>
+          <button id="leaveBtn" style="display:none;">
+            × ЗАВЕРШИТЬ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="remoteAudio" autoplay></audio>
+
+    <!-- Конфигурация приложения -->
+    <script src="config.js"></script>
+
+    <!-- Модальное окно настроек -->
+    <div class="modal" id="settingsModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>⚙ НАСТРОЙКИ</h2>
+          <button class="close-btn" id="closeModal">×</button>
+        </div>
+
+        <!-- Бесплатные настройки -->
+        <div class="settings-section">
+          <h3>// Основные настройки</h3>
+
+          <div class="setting-item">
+            <label>Ваш никнейм</label>
+            <input type="text" id="nickname" placeholder="Введите ник" />
+          </div>
+
+          <div class="setting-item">
+            <label>Аватар</label>
+            <input type="file" id="avatar" accept="image/*" />
+          </div>
+
+          <div class="setting-item">
+            <label>Звук уведомлений</label>
+            <input type="checkbox" id="soundNotif" checked />
+          </div>
+
+          <div class="setting-item">
+            <label>Автоматический поиск</label>
+            <input type="checkbox" id="autoSearch" />
+          </div>
+        </div>
+
+        <!-- Платные фильтры -->
+        <div class="settings-section">
+          <h3>// Фильтры поиска <span class="premium-badge">Premium</span></h3>
+
+          <div class="setting-item locked-feature">
+            <label>Фильтр по полу</label>
+            <select id="genderFilter" disabled>
+              <option value="all">Все</option>
+              <option value="male">Мужчины</option>
+              <option value="female">Женщины</option>
+            </select>
+          </div>
+
+          <div class="setting-item locked-feature">
+            <label>Возраст от</label>
+            <select id="ageFrom" disabled>
+              <option value="18">18+</option>
+              <option value="21">21+</option>
+              <option value="25">25+</option>
+              <option value="30">30+</option>
+            </select>
+          </div>
+
+          <div class="setting-item locked-feature">
+            <label>Возраст до</label>
+            <select id="ageTo" disabled>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+              <option value="99">Без ограничений</option>
+            </select>
+          </div>
+
+          <div class="setting-item locked-feature">
+            <label>Фильтр по интересам</label>
+            <input type="text" id="interests" placeholder="Спорт, музыка..." disabled />
+          </div>
+        </div>
+
+        <button class="save-btn" id="saveSettings">→ СОХРАНИТЬ НАСТРОЙКИ</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно админ-панели -->
+    <div class="modal" id="adminModal">
+      <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+          <h2>👑 АДМИН-ПАНЕЛЬ</h2>
+          <button class="close-btn" id="closeAdminModal">×</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>// Управление пользователями</h3>
+          <div id="usersListContainer" style="max-height: 400px; overflow-y: auto;">
+            <div style="text-align: center; padding: 20px; opacity: 0.5;">
+              Загрузка списка пользователей...
+            </div>
+          </div>
+        </div>
+
+        <button class="save-btn" id="refreshUsers">⟳ ОБНОВИТЬ СПИСОК</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

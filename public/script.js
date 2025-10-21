@@ -826,3 +826,46 @@ window.addEventListener('load', function() {
     }
   }, 100);
 });
+
+// ===== PREMIUM STATUS MANAGEMENT =====
+let userPremiumStatus = null;
+
+function getTelegramUserId() {
+  let userId = new URLSearchParams(window.location.search).get('userId');
+  if (!userId) userId = localStorage.getItem('telegramUserId');
+  if (!userId && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+    userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+  }
+  if (userId) localStorage.setItem('telegramUserId', userId);
+  return userId;
+}
+
+async function loadPremiumStatus() {
+  try {
+    const userId = getTelegramUserId();
+    if (!userId) return;
+    const response = await fetch('/api/subscription/' + userId);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.ok && data.subscription) {
+        userPremiumStatus = data.subscription;
+        if (userPremiumStatus.status === 'active') {
+          showPremiumBadge();
+        }
+      }
+    }
+  } catch (e) {
+    console.log('Could not load premium status');
+  }
+}
+
+function showPremiumBadge() {
+  if (document.getElementById('premium-badge')) return;
+  const badge = document.createElement('div');
+  badge.id = 'premium-badge';
+  badge.innerHTML = '👑 PREMIUM';
+  document.body.appendChild(badge);
+}
+
+// Load premium status on app start
+loadPremiumStatus();

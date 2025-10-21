@@ -17,7 +17,7 @@ module.exports = {
       NODE_ENV: 'production',
       PORT: 3000,
       // Добавьте сюда свой Telegram ID через запятую (например: "123456789,987654321")
-      ADMIN_IDS: "",
+      ADMIN_IDS: "123456789",
       BOT_TOKEN: ""
     },
 

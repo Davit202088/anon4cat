@@ -87,13 +87,13 @@ function checkUserAuth() {
 }
 
 function showAuthMenu() {
-  authContainer.style.display = 'flex';
-  userMenu.style.display = 'none';
+  authContainer.classList.add('show');
+  userMenu.classList.remove('show');
 }
 
 function showUserMenu() {
-  authContainer.style.display = 'none';
-  userMenu.style.display = 'flex';
+  authContainer.classList.remove('show');
+  userMenu.classList.add('show');
 }
 
 function loginWithTelegram() {
@@ -138,18 +138,35 @@ function logout() {
   showAuthMenu();
 }
 
+// Initial check
+try {
+  checkUserAuth();
+} catch (e) {
+  console.error('Error in initial auth check:', e);
+}
+
 // Event listeners
-loginBtn.addEventListener('click', loginWithTelegram);
-cabinetBtn.addEventListener('click', function() {
-  if (currentUser && currentUser.id) {
-    window.open('/cabinet.html?userId=' + currentUser.id, '_blank');
-  } else {
-    alert('Ошибка: пользователь не определён');
-  }
+if (loginBtn) {
+  loginBtn.addEventListener('click', loginWithTelegram);
+}
+if (cabinetBtn) {
+  cabinetBtn.addEventListener('click', function() {
+    if (currentUser && currentUser.id) {
+      window.open('/cabinet.html?userId=' + currentUser.id, '_blank');
+    } else {
+      alert('Ошибка: пользователь не определён');
+    }
+  });
+}
+
+// Check auth on DOMContentLoaded and load
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded - checking auth');
+  checkUserAuth();
 });
 
-// Check auth on load
 window.addEventListener('load', () => {
+  console.log('load - checking auth again');
   checkUserAuth();
 });
 

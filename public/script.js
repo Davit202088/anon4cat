@@ -796,12 +796,17 @@ document.addEventListener('DOMContentLoaded', function() {
   if (cabinetBtn) {
     cabinetBtn.addEventListener('click', function() {
       console.log('Cabinet button clicked');
-      const cabinetUrl = '/cabinet.html';
-      
-      if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openLink(cabinetUrl);
+      let telegramUser = null;
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+        telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+      }
+      if (telegramUser && telegramUser.id) {
+        localStorage.setItem('telegramUserId', telegramUser.id);
+        localStorage.setItem('telegramUser', JSON.stringify(telegramUser));
+        window.open('/cabinet.html?userId=' + telegramUser.id, '_blank');
       } else {
-        window.open(cabinetUrl, '_blank');
+        alert('Это приложение работает только в Telegram!');
+        window.open('/cabinet.html', '_blank');
       }
     });
     console.log('Cabinet button initialized');

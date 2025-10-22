@@ -916,6 +916,147 @@ async function toggleRole(userId, currentRole) {
   }
 }
 
+// ============ CABINET VIEW ============
+function showCabinet() {
+  if (!currentUser) return;
+
+  console.log('Showing cabinet for user:', currentUser);
+
+  // Hide main chat area
+  const container = document.querySelector('.container');
+  if (container) {
+    container.style.display = 'none';
+  }
+
+  // Create or show cabinet overlay
+  let cabinetView = document.getElementById('cabinetView');
+  if (!cabinetView) {
+    cabinetView = document.createElement('div');
+    cabinetView.id = 'cabinetView';
+    cabinetView.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0a0e27;
+      background-image:
+        linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: 100;
+      overflow-y: auto;
+      padding: 20px;
+    `;
+    cabinetView.innerHTML = `
+      <div style="max-width: 600px; margin: 0 auto; color: #00f2fe;">
+        <button onclick="closeCabinet()" style="
+          background: rgba(0, 242, 254, 0.1);
+          border: 2px solid #00f2fe;
+          color: #00f2fe;
+          padding: 8px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+          margin-bottom: 20px;
+          font-weight: 600;
+          text-transform: uppercase;
+        "><i class="fas fa-arrow-left"></i> Назад</button>
+
+        <h1 style="
+          text-align: center;
+          font-size: 2rem;
+          margin-bottom: 10px;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        "><i class="fas fa-user"></i> Кабинет</h1>
+
+        <p style="
+          text-align: center;
+          color: rgba(0, 242, 254, 0.6);
+          margin-bottom: 30px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        ">Личный профиль</p>
+
+        <div style="
+          background: rgba(0, 242, 254, 0.1);
+          border: 2px solid rgba(0, 242, 254, 0.3);
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 20px;
+        ">
+          <div style="margin-bottom: 15px;">
+            <div style="color: rgba(0, 242, 254, 0.6); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px;">Telegram ID</div>
+            <div style="font-size: 1.2rem; font-weight: 600;">${currentUser.id}</div>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            <div style="color: rgba(0, 242, 254, 0.6); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px;">Имя</div>
+            <div style="font-size: 1.2rem; font-weight: 600;">${currentUser.first_name} ${currentUser.last_name || ''}</div>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            <div style="color: rgba(0, 242, 254, 0.6); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px;">Юзернейм</div>
+            <div style="font-size: 1.2rem; font-weight: 600;">@${currentUser.username || 'не указан'}</div>
+          </div>
+
+          ${currentUser.is_premium ? `
+            <div style="
+              background: rgba(255, 0, 255, 0.2);
+              border: 1px solid rgba(255, 0, 255, 0.4);
+              border-radius: 8px;
+              padding: 10px;
+              text-align: center;
+              color: #ff00ff;
+              font-weight: 600;
+            ">👑 PREMIUM SUBSCRIBER</div>
+          ` : `
+            <div style="
+              background: rgba(160, 168, 255, 0.2);
+              border: 1px solid rgba(160, 168, 255, 0.4);
+              border-radius: 8px;
+              padding: 10px;
+              text-align: center;
+              color: #a0a8ff;
+              font-weight: 600;
+            ">FREE PLAN</div>
+          `}
+        </div>
+
+        <button onclick="logout()" style="
+          width: 100%;
+          background: rgba(255, 68, 68, 0.1);
+          border: 2px solid #ff4444;
+          color: #ff4444;
+          padding: 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          text-transform: uppercase;
+          transition: all 0.3s ease;
+        " onmouseover="this.style.background='rgba(255, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(255, 68, 68, 0.1)'">
+          <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+      </div>
+    `;
+    document.body.appendChild(cabinetView);
+  }
+
+  cabinetView.style.display = 'block';
+}
+
+function closeCabinet() {
+  const cabinetView = document.getElementById('cabinetView');
+  if (cabinetView) {
+    cabinetView.style.display = 'none';
+  }
+
+  const container = document.querySelector('.container');
+  if (container) {
+    container.style.display = 'flex';
+  }
+}
+
 // ============ INITIALIZE AUTH WHEN DOM IS READY ============
 function initializeAuth() {
   console.log('Initializing auth...');
@@ -978,7 +1119,7 @@ function initializeAuth() {
     cabinetBtn.addEventListener('click', function() {
       console.log('Cabinet button clicked!');
       if (currentUser && currentUser.id) {
-        window.open('/cabinet.html?userId=' + currentUser.id, '_blank');
+        showCabinet();
       } else {
         alert('Ошибка: пользователь не определён');
       }

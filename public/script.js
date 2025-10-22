@@ -1,3 +1,12 @@
+// ============ TELEGRAM WEB APP INITIALIZATION ============
+if (window.Telegram && window.Telegram.WebApp) {
+  const tg = window.Telegram.WebApp;
+  console.log('Telegram Web App initialized');
+  console.log('User data:', tg.initDataUnsafe?.user);
+  // Expand the app to fill the screen
+  tg.expand();
+}
+
 // Get elements
 const findBtn = document.getElementById('findBtn');
 const leaveBtn = document.getElementById('leaveBtn');
@@ -97,8 +106,56 @@ function showUserMenu() {
 }
 
 function loginWithTelegram() {
-  // Show login modal form instead of requiring Telegram
-  console.log('Opening login modal...');
+  console.log('Login button clicked');
+
+  // Check if Telegram Web App is available
+  if (window.Telegram && window.Telegram.WebApp) {
+    console.log('Telegram Web App available');
+    const tg = window.Telegram.WebApp;
+
+    // Get user data from Telegram
+    const user = tg.initDataUnsafe?.user;
+
+    if (user && user.id) {
+      console.log('Telegram user found:', user);
+      // Auto-login with Telegram data
+      const telegramUser = {
+        id: user.id,
+        first_name: user.first_name || 'User',
+        last_name: user.last_name || '',
+        username: user.username || 'user' + user.id,
+        is_bot: user.is_bot || false,
+        is_premium: user.is_premium || false
+      };
+
+      // Save and login
+      localStorage.setItem('telegramUserId', telegramUser.id);
+      localStorage.setItem('telegramUser', JSON.stringify(telegramUser));
+      currentUser = telegramUser;
+
+      // Initialize on backend
+      fetch('/api/init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          initData: tg.initData
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        console.log('User initialized:', data);
+        showUserMenu();
+      })
+      .catch(e => {
+        console.error('Init error:', e);
+        showUserMenu();
+      });
+      return;
+    }
+  }
+
+  // Fallback: Show login modal form if Telegram not available
+  console.log('Telegram not available, showing login modal...');
   const loginModal = document.getElementById('loginModal');
   if (loginModal) {
     loginModal.classList.add('show');

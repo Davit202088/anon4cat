@@ -149,37 +149,7 @@ function logout() {
   showAuthMenu();
 }
 
-// Initial check
-try {
-  checkUserAuth();
-} catch (e) {
-  console.error('Error in initial auth check:', e);
-}
-
-// Event listeners
-if (loginBtn) {
-  loginBtn.addEventListener('click', loginWithTelegram);
-}
-if (cabinetBtn) {
-  cabinetBtn.addEventListener('click', function() {
-    if (currentUser && currentUser.id) {
-      window.open('/cabinet.html?userId=' + currentUser.id, '_blank');
-    } else {
-      alert('Ошибка: пользователь не определён');
-    }
-  });
-}
-
-// Check auth on DOMContentLoaded and load
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOMContentLoaded - checking auth');
-  checkUserAuth();
-});
-
-window.addEventListener('load', () => {
-  console.log('load - checking auth again');
-  checkUserAuth();
-});
+// Will be initialized after DOM is ready (at end of script)
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -873,5 +843,50 @@ async function toggleRole(userId, currentRole) {
   }
 }
 
-// Initialize user when page loads (new method with auth buttons)
-// initUser() - replaced by checkUserAuth() above
+// ============ INITIALIZE AUTH WHEN DOM IS READY ============
+function initializeAuth() {
+  console.log('Initializing auth...');
+  console.log('loginBtn:', loginBtn);
+  console.log('cabinetBtn:', cabinetBtn);
+  console.log('settingsBtn:', settingsBtn);
+  console.log('authContainer:', authContainer);
+  console.log('userMenu:', userMenu);
+
+  // Add event listeners
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      console.log('Login button clicked!');
+      loginWithTelegram();
+    });
+    console.log('✓ Login button listener added');
+  } else {
+    console.error('✗ Login button not found!');
+  }
+
+  if (cabinetBtn) {
+    cabinetBtn.addEventListener('click', function() {
+      console.log('Cabinet button clicked!');
+      if (currentUser && currentUser.id) {
+        window.open('/cabinet.html?userId=' + currentUser.id, '_blank');
+      } else {
+        alert('Ошибка: пользователь не определён');
+      }
+    });
+    console.log('✓ Cabinet button listener added');
+  } else {
+    console.error('✗ Cabinet button not found!');
+  }
+
+  // Check auth status
+  console.log('Checking user auth...');
+  checkUserAuth();
+  console.log('Auth check complete');
+}
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeAuth);
+} else {
+  // DOM is already ready
+  initializeAuth();
+}

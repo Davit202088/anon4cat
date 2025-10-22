@@ -97,16 +97,27 @@ function showUserMenu() {
 }
 
 function loginWithTelegram() {
-  if (!window.Telegram || !window.Telegram.WebApp) {
-    alert('❌ Это приложение доступно только в Telegram!');
-    return;
+  let telegramUser = null;
+  let initData = null;
+
+  // Try to get data from Telegram WebApp
+  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
+    telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+    initData = window.Telegram.WebApp.initData;
+    console.log('Telegram user data found:', telegramUser);
   }
 
-  const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
-
+  // If no Telegram data, use test/mock user (for development/testing)
   if (!telegramUser || !telegramUser.id) {
-    alert('❌ Не удалось получить данные Telegram');
-    return;
+    // Create mock user for testing outside Telegram
+    telegramUser = {
+      id: 123456789,
+      first_name: 'Test',
+      last_name: 'User',
+      username: 'testuser',
+      is_bot: false
+    };
+    console.log('Using test user (not in Telegram):', telegramUser);
   }
 
   // Save user to localStorage
@@ -121,7 +132,7 @@ function loginWithTelegram() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      initData: window.Telegram.WebApp.initData
+      initData: initData || 'test_init_data'
     })
   })
   .then(r => r.json())

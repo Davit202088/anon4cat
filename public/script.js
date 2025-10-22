@@ -597,8 +597,6 @@ function handleSwipeDirection(diff) {
 setStatus('>> PRESS BUTTON TO START');
 
 // ==================== USER MANAGEMENT ====================
-let currentUser = null;
-
 // Initialize user on page load
 async function initUser() {
   try {
@@ -864,5 +862,5 @@ async function toggleRole(userId, currentRole) {
   }
 }
 
-// Initialize user when page loads
-initUser();
+// Initialize user when page loads (new method with auth buttons)
+// initUser() - replaced by checkUserAuth() above

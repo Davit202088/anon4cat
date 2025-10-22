@@ -118,22 +118,8 @@ function loginWithTelegram() {
 
     if (user && user.id) {
       console.log('Telegram user found:', user);
-      // Auto-login with Telegram data
-      const telegramUser = {
-        id: user.id,
-        first_name: user.first_name || 'User',
-        last_name: user.last_name || '',
-        username: user.username || 'user' + user.id,
-        is_bot: user.is_bot || false,
-        is_premium: user.is_premium || false
-      };
 
-      // Save and login
-      localStorage.setItem('telegramUserId', telegramUser.id);
-      localStorage.setItem('telegramUser', JSON.stringify(telegramUser));
-      currentUser = telegramUser;
-
-      // Initialize on backend
+      // Initialize on backend first
       fetch('/api/init', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,10 +130,41 @@ function loginWithTelegram() {
       .then(r => r.json())
       .then(data => {
         console.log('User initialized:', data);
-        showUserMenu();
+        if (data.ok && data.user) {
+          // Use data from server
+          currentUser = data.user;
+
+          // Save to localStorage
+          localStorage.setItem('telegramUserId', currentUser.id);
+          localStorage.setItem('telegramUser', JSON.stringify(currentUser));
+
+          // Update UI
+          showUserMenu();
+          updateUserStatusDisplay();
+
+          // Show admin button if user is admin
+          if (currentUser.role === 'admin') {
+            showAdminButton();
+          }
+        } else {
+          console.error('Server returned error:', data.error);
+          showAuthMenu();
+        }
       })
       .catch(e => {
         console.error('Init error:', e);
+        // Fallback to basic user data
+        const telegramUser = {
+          id: user.id,
+          first_name: user.first_name || 'User',
+          last_name: user.last_name || '',
+          username: user.username || 'user' + user.id,
+          is_bot: user.is_bot || false,
+          is_premium: user.is_premium || false
+        };
+        localStorage.setItem('telegramUserId', telegramUser.id);
+        localStorage.setItem('telegramUser', JSON.stringify(telegramUser));
+        currentUser = telegramUser;
         showUserMenu();
       });
       return;
@@ -656,7 +673,8 @@ async function initUser() {
   try {
     // Get Telegram WebApp init data
     if (window.Telegram && window.Telegram.WebApp) {
-      const initData = window.Telegram.WebApp.initData;
+      const tg = window.Telegram.WebApp;
+      const initData = tg.initData;
 
       if (initData) {
         const response = await fetch('/api/init', {
@@ -669,12 +687,20 @@ async function initUser() {
 
         if (data.ok && data.user) {
           currentUser = data.user;
+
+          // Save to localStorage
+          localStorage.setItem('telegramUserId', currentUser.id);
+          localStorage.setItem('telegramUser', JSON.stringify(currentUser));
+
+          // Update UI
           updateUserStatusDisplay();
 
           // Show admin button if user is admin
           if (currentUser.role === 'admin') {
             showAdminButton();
           }
+
+          console.log('User initialized from Telegram:', currentUser);
         }
       }
     }

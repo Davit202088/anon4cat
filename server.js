@@ -191,14 +191,25 @@ app.post("/api/init", async (req, res) => {
     const user = getOrCreateUser(telegramUser);
     const subscription = db.prepare("SELECT * FROM subscriptions WHERE userId = ?").get(user.userId);
 
+    // Format response to match client expectations
+    const premiumStatus = subscription && subscription.status === 'active' ? 'premium' : 'free';
+    const isPremium = premiumStatus === 'premium';
+
     res.send({
       ok: true,
       verified: verified,
       user: {
+        id: user.userId,
         userId: user.userId,
-        username: user.username,
+        first_name: user.firstName,
         firstName: user.firstName,
+        last_name: user.lastName,
+        lastName: user.lastName,
+        username: user.username,
+        is_premium: isPremium,
+        is_bot: false,
         role: user.role,
+        premiumStatus: premiumStatus,
         subscription: subscription
       }
     });
@@ -278,7 +289,13 @@ app.get("/api/admin/users", (req, res) => {
       LEFT JOIN subscriptions s ON u.userId = s.userId
     `).all();
 
-    res.send({ ok: true, users: users || [] });
+    // Format users to match client expectations
+    const formattedUsers = users.map(user => ({
+      ...user,
+      premiumStatus: user.status === 'active' ? 'premium' : 'free'
+    }));
+
+    res.send({ ok: true, users: formattedUsers || [] });
   } catch (e) {
     console.error(e);
     res.status(500).send({ ok: false, error: "server error" });
@@ -342,6 +359,106 @@ app.post("/api/admin/update-subscription", (req, res) => {
       ok: true,
       message: "Subscription updated",
       subscription: subscription
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ ok: false, error: "server error" });
+  }
+});
+
+// Admin: Update premium status (simpler version)
+app.post("/api/admin/update-premium", (req, res) => {
+  try {
+    const { adminId, userId, premiumStatus } = req.body;
+
+    if (!isAdmin(adminId)) {
+      return res.status(403).send({ ok: false, error: "Access denied" });
+    }
+
+    const user = db.prepare("SELECT * FROM users WHERE userId = ?").get(userId);
+    if (!user) {
+      return res.status(404).send({ ok: false, error: "User not found" });
+    }
+
+    const now = new Date();
+    const oldSub = db.prepare("SELECT * FROM subscriptions WHERE userId = ?").get(userId);
+
+    const newStatus = premiumStatus === 'premium' ? 'active' : 'free';
+    const newTier = premiumStatus === 'premium' ? 'premium_1month' : 'free';
+    let expiresAt = null;
+
+    if (premiumStatus === 'premium') {
+      // Set premium for 30 days by default
+      const expiresDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      expiresAt = expiresDate.toISOString();
+    }
+
+    db.prepare(`
+      UPDATE subscriptions
+      SET status = ?, tier = ?, expiresAt = ?, updatedAt = ?
+      WHERE userId = ?
+    `).run(newStatus, newTier, expiresAt, now.toISOString(), userId);
+
+    logAdminAction(
+      adminId,
+      userId,
+      'premium_update',
+      oldSub ? oldSub.status : 'free',
+      newStatus
+    );
+
+    console.log(`Admin ${adminId} updated ${userId} premium status to: ${premiumStatus}`);
+
+    res.send({
+      ok: true,
+      message: "Premium status updated"
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ ok: false, error: "server error" });
+  }
+});
+
+// Admin: Update role
+app.post("/api/admin/update-role", (req, res) => {
+  try {
+    const { adminId, userId, role } = req.body;
+
+    if (!isAdmin(adminId)) {
+      return res.status(403).send({ ok: false, error: "Access denied" });
+    }
+
+    const user = db.prepare("SELECT * FROM users WHERE userId = ?").get(userId);
+    if (!user) {
+      return res.status(404).send({ ok: false, error: "User not found" });
+    }
+
+    const validRoles = ['user', 'admin'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).send({ ok: false, error: "Invalid role" });
+    }
+
+    const oldRole = user.role;
+
+    db.prepare(`
+      UPDATE users
+      SET role = ?
+      WHERE userId = ?
+    `).run(role, userId);
+
+    logAdminAction(
+      adminId,
+      userId,
+      'role_update',
+      oldRole,
+      role
+    );
+
+    console.log(`Admin ${adminId} updated ${userId} role to: ${role}`);
+
+    res.send({
+      ok: true,
+      message: "Role updated"
     });
   } catch (e) {
     console.error(e);

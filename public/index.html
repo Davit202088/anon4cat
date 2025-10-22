@@ -673,6 +673,128 @@
         z-index: 999;
       }
 
+      /* Login Modal */
+      .login-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .login-modal.show {
+        display: flex;
+      }
+
+      .login-modal-content {
+        background: rgba(10, 14, 39, 0.95);
+        border: 2px solid rgba(0, 242, 254, 0.3);
+        border-radius: 15px;
+        padding: 40px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 0 50px rgba(0, 242, 254, 0.3);
+        position: relative;
+      }
+
+      .login-modal-content h2 {
+        color: #00f2fe;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 1.5rem;
+      }
+
+      .login-subtitle {
+        color: rgba(0, 242, 254, 0.6);
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .login-form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      #loginInput {
+        flex: 1;
+        padding: 12px 15px;
+        background: rgba(0, 242, 254, 0.05);
+        border: 1px solid rgba(0, 242, 254, 0.3);
+        border-radius: 8px;
+        color: #00f2fe;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+      }
+
+      #loginInput:focus {
+        outline: none;
+        border-color: #00f2fe;
+        background: rgba(0, 242, 254, 0.1);
+        box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+      }
+
+      #loginInput::placeholder {
+        color: rgba(0, 242, 254, 0.4);
+      }
+
+      .login-submit-btn {
+        padding: 12px 24px;
+        background: rgba(0, 242, 254, 0.1);
+        color: #00f2fe;
+        border: 2px solid #00f2fe;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      .login-submit-btn:hover {
+        background: rgba(0, 242, 254, 0.2);
+        box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+      }
+
+      .login-submit-btn i {
+        font-size: 1rem;
+      }
+
+      .close-login-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: #00f2fe;
+        font-size: 28px;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .close-login-btn:hover {
+        color: #00d4ff;
+        transform: rotate(90deg);
+      }
+
       @media (max-width: 600px) {
         .container {
           padding: 30px 20px;
@@ -728,6 +850,23 @@
         <i class="fas fa-user"></i>
       </button>
       <button class="settings-btn" id="settingsBtn" title="Настройки"><i class="fas fa-cog"></i></button>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+      <div class="login-modal-content">
+        <h2>Вход в систему</h2>
+        <p class="login-subtitle">Введите ваш ID пользователя</p>
+
+        <div class="login-form">
+          <input type="text" id="loginInput" placeholder="ID (или просто нажмите Вход)" maxlength="20">
+          <button id="loginSubmitBtn" class="login-submit-btn">
+            <i class="fas fa-arrow-right"></i> ВХОД
+          </button>
+        </div>
+
+        <button id="closeLoginModal" class="close-login-btn">×</button>
+      </div>
     </div>
 
     <!-- User Status Badge -->

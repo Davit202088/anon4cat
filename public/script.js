@@ -97,34 +97,50 @@ function showUserMenu() {
 }
 
 function loginWithTelegram() {
-  let telegramUser = null;
-  let initData = null;
+  // Show login modal form instead of requiring Telegram
+  console.log('Opening login modal...');
+  const loginModal = document.getElementById('loginModal');
+  if (loginModal) {
+    loginModal.classList.add('show');
+    const loginInput = document.getElementById('loginInput');
+    if (loginInput) {
+      loginInput.focus();
+    }
+  }
+}
 
-  // Try to get data from Telegram WebApp
-  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-    telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
-    initData = window.Telegram.WebApp.initData;
-    console.log('Telegram user data found:', telegramUser);
+function submitLogin() {
+  const loginInput = document.getElementById('loginInput');
+  let userId = loginInput ? loginInput.value.trim() : '';
+
+  // If no input, use default test ID
+  if (!userId) {
+    userId = '123456789';
   }
 
-  // If no Telegram data, use test/mock user (for development/testing)
-  if (!telegramUser || !telegramUser.id) {
-    // Create mock user for testing outside Telegram
-    telegramUser = {
-      id: 123456789,
-      first_name: 'Test',
-      last_name: 'User',
-      username: 'testuser',
-      is_bot: false
-    };
-    console.log('Using test user (not in Telegram):', telegramUser);
-  }
+  // Create user object
+  const telegramUser = {
+    id: parseInt(userId) || 123456789,
+    first_name: 'User',
+    last_name: userId,
+    username: 'user' + userId,
+    is_bot: false
+  };
+
+  console.log('User logged in:', telegramUser);
 
   // Save user to localStorage
   localStorage.setItem('telegramUserId', telegramUser.id);
   localStorage.setItem('telegramUser', JSON.stringify(telegramUser));
 
   currentUser = telegramUser;
+
+  // Close modal
+  const loginModal = document.getElementById('loginModal');
+  if (loginModal) {
+    loginModal.classList.remove('show');
+  }
+
   showUserMenu();
 
   // Initialize user on backend if needed
@@ -132,7 +148,7 @@ function loginWithTelegram() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      initData: initData || 'test_init_data'
+      initData: 'test_init_data'
     })
   })
   .then(r => r.json())
@@ -861,6 +877,44 @@ function initializeAuth() {
     console.log('✓ Login button listener added');
   } else {
     console.error('✗ Login button not found!');
+  }
+
+  // Add login modal handlers
+  const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+  const closeLoginModal = document.getElementById('closeLoginModal');
+  const loginInput = document.getElementById('loginInput');
+  const loginModal = document.getElementById('loginModal');
+
+  if (loginSubmitBtn) {
+    loginSubmitBtn.addEventListener('click', submitLogin);
+    console.log('✓ Login submit button listener added');
+  }
+
+  if (closeLoginModal) {
+    closeLoginModal.addEventListener('click', () => {
+      if (loginModal) {
+        loginModal.classList.remove('show');
+      }
+    });
+    console.log('✓ Close login modal listener added');
+  }
+
+  if (loginInput) {
+    loginInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitLogin();
+      }
+    });
+    console.log('✓ Login input enter key listener added');
+  }
+
+  // Close modal when clicking outside
+  if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+        loginModal.classList.remove('show');
+      }
+    });
   }
 
   if (cabinetBtn) {

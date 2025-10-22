@@ -1,3 +1,4 @@
+// Get elements
 const findBtn = document.getElementById('findBtn');
 const leaveBtn = document.getElementById('leaveBtn');
 const nextBtn = document.getElementById('nextBtn');
@@ -9,6 +10,10 @@ const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const closeModal = document.getElementById('closeModal');
 const saveSettings = document.getElementById('saveSettings');
+const loginBtn = document.getElementById('loginBtn');
+const authContainer = document.getElementById('authContainer');
+const userMenu = document.getElementById('userMenu');
+const cabinetBtn = document.getElementById('cabinetBtn');
 
 let ws;
 let pc;
@@ -66,6 +71,88 @@ saveSettings.onclick = saveUserSettings;
 // Загружаем настройки при запуске
 loadSettings();
 
+// ============ TELEGRAM AUTH ============
+let currentUser = null;
+
+function checkUserAuth() {
+  const userId = localStorage.getItem('telegramUserId');
+  const user = localStorage.getItem('telegramUser');
+
+  if (userId && user) {
+    currentUser = JSON.parse(user);
+    showUserMenu();
+  } else {
+    showAuthMenu();
+  }
+}
+
+function showAuthMenu() {
+  authContainer.style.display = 'flex';
+  userMenu.style.display = 'none';
+}
+
+function showUserMenu() {
+  authContainer.style.display = 'none';
+  userMenu.style.display = 'flex';
+}
+
+function loginWithTelegram() {
+  if (!window.Telegram || !window.Telegram.WebApp) {
+    alert('❌ Это приложение доступно только в Telegram!');
+    return;
+  }
+
+  const telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+
+  if (!telegramUser || !telegramUser.id) {
+    alert('❌ Не удалось получить данные Telegram');
+    return;
+  }
+
+  // Save user to localStorage
+  localStorage.setItem('telegramUserId', telegramUser.id);
+  localStorage.setItem('telegramUser', JSON.stringify(telegramUser));
+
+  currentUser = telegramUser;
+  showUserMenu();
+
+  // Initialize user on backend if needed
+  fetch('/api/init', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      initData: window.Telegram.WebApp.initData
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    console.log('User initialized:', data);
+  })
+  .catch(e => console.error('Init error:', e));
+}
+
+function logout() {
+  localStorage.removeItem('telegramUserId');
+  localStorage.removeItem('telegramUser');
+  currentUser = null;
+  showAuthMenu();
+}
+
+// Event listeners
+loginBtn.addEventListener('click', loginWithTelegram);
+cabinetBtn.addEventListener('click', function() {
+  if (currentUser && currentUser.id) {
+    window.open('/cabinet.html?userId=' + currentUser.id, '_blank');
+  } else {
+    alert('Ошибка: пользователь не определён');
+  }
+});
+
+// Check auth on load
+window.addEventListener('load', () => {
+  checkUserAuth();
+});
+
 function setStatus(text) {
   statusEl.textContent = text;
   console.log('Status:', text);
@@ -80,10 +167,10 @@ function toggleMute() {
   });
 
   if (isMuted) {
-    muteBtn.innerHTML = '🔇 МИК ВКЛ';
+    muteBtn.innerHTML = '<i class="fas fa-microphone"></i> МИК ВКЛ';
     muteBtn.classList.add('muted');
   } else {
-    muteBtn.innerHTML = '🔊 МИК ВЫКЛ';
+    muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> МИК ВЫКЛ';
     muteBtn.classList.remove('muted');
   }
 
@@ -762,115 +849,3 @@ async function toggleRole(userId, currentRole) {
 
 // Initialize user when page loads
 initUser();
-
-// ==================== PERSONAL CABINET ====================
-
-// Add Cabinet button
-function addCabinetButton() {
-  const cabinetBtn = document.createElement('button');
-  cabinetBtn.id = 'cabinetBtn';
-  cabinetBtn.className = 'settings-btn';
-  cabinetBtn.style.right = '70px';
-  cabinetBtn.innerHTML = '👤 КАБИНЕТ';
-  cabinetBtn.onclick = openCabinet;
-  document.body.appendChild(cabinetBtn);
-  console.log('Cabinet button added');
-}
-
-// Open cabinet
-function openCabinet() {
-  const cabinetUrl = '/cabinet.html';
-
-  if (window.Telegram && window.Telegram.WebApp) {
-    window.Telegram.WebApp.openLink(cabinetUrl);
-  } else {
-    window.open(cabinetUrl, '_blank');
-  }
-}
-
-// Add button after page loads
-setTimeout(addCabinetButton, 1000);
-// Cabinet button click handler
-document.addEventListener('DOMContentLoaded', function() {
-  const cabinetBtn = document.getElementById('cabinetBtn');
-  if (cabinetBtn) {
-    cabinetBtn.addEventListener('click', function() {
-      console.log('Cabinet button clicked');
-      let telegramUser = null;
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
-        telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
-      }
-      if (telegramUser && telegramUser.id) {
-        localStorage.setItem('telegramUserId', telegramUser.id);
-        localStorage.setItem('telegramUser', JSON.stringify(telegramUser));
-        window.open('/cabinet.html?userId=' + telegramUser.id, '_blank');
-      } else {
-        alert('Это приложение работает только в Telegram!');
-        window.open('/cabinet.html', '_blank');
-      }
-    });
-    console.log('Cabinet button initialized');
-  } else {
-    console.warn('Cabinet button not found');
-  }
-});
-
-// Also handle if button is added after load
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    const cabinetBtn = document.getElementById('cabinetBtn');
-    if (cabinetBtn && !cabinetBtn.onclick) {
-      cabinetBtn.onclick = function() {
-        const cabinetUrl = '/cabinet.html';
-        if (window.Telegram && window.Telegram.WebApp) {
-          window.Telegram.WebApp.openLink(cabinetUrl);
-        } else {
-          window.open(cabinetUrl, '_blank');
-        }
-      };
-    }
-  }, 100);
-});
-
-// ===== PREMIUM STATUS MANAGEMENT =====
-let userPremiumStatus = null;
-
-function getTelegramUserId() {
-  let userId = new URLSearchParams(window.location.search).get('userId');
-  if (!userId) userId = localStorage.getItem('telegramUserId');
-  if (!userId && window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
-    userId = window.Telegram.WebApp.initDataUnsafe.user.id;
-  }
-  if (userId) localStorage.setItem('telegramUserId', userId);
-  return userId;
-}
-
-async function loadPremiumStatus() {
-  try {
-    const userId = getTelegramUserId();
-    if (!userId) return;
-    const response = await fetch('/api/subscription/' + userId);
-    if (response.ok) {
-      const data = await response.json();
-      if (data.ok && data.subscription) {
-        userPremiumStatus = data.subscription;
-        if (userPremiumStatus.status === 'active') {
-          showPremiumBadge();
-        }
-      }
-    }
-  } catch (e) {
-    console.log('Could not load premium status');
-  }
-}
-
-function showPremiumBadge() {
-  if (document.getElementById('premium-badge')) return;
-  const badge = document.createElement('div');
-  badge.id = 'premium-badge';
-  badge.innerHTML = '👑 PREMIUM';
-  document.body.appendChild(badge);
-}
-
-// Load premium status on app start
-loadPremiumStatus();

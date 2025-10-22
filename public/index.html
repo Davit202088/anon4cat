@@ -275,6 +275,28 @@
         box-shadow: 0 0 30px rgba(160, 168, 255, 0.4);
       }
 
+      /* Button Icons */
+      .buttons button i {
+        margin-right: 8px;
+        font-size: 1.1rem;
+      }
+
+      #findBtn i {
+        color: #00f2fe;
+      }
+
+      #nextBtn i {
+        color: #00f2fe;
+      }
+
+      #muteBtn i {
+        color: #a0a8ff;
+      }
+
+      #leaveBtn i {
+        color: #ff00ff;
+      }
+
       #muteBtn.muted {
         background: rgba(255, 0, 255, 0.1);
         border: 2px solid #ff00ff;
@@ -586,6 +608,48 @@
         box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
       }
 
+      /* Auth Buttons */
+      .auth-container {
+        position: absolute;
+        top: 20px;
+        right: 130px;
+        display: flex;
+        gap: 10px;
+        z-index: 999;
+      }
+
+      .auth-btn {
+        background: rgba(10, 14, 39, 0.8);
+        color: #00f2fe;
+        border: 2px solid #00f2fe;
+        border-radius: 8px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .auth-btn:hover {
+        background: rgba(0, 242, 254, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 0 30px rgba(0, 242, 254, 0.6);
+      }
+
+      .auth-btn i {
+        font-size: 1rem;
+      }
+
+      #userMenu {
+        display: flex !important;
+      }
+
       @media (max-width: 600px) {
         .container {
           padding: 30px 20px;
@@ -623,9 +687,25 @@
         }
       }
     </style>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   </head>
   <body>
-    <button class="settings-btn" id="settingsBtn" style="width: 48px; padding: 12px 8px; font-size: 18px;">⚙</button>
+    <!-- Auth Container -->
+    <div class="auth-container" id="authContainer">
+      <button class="auth-btn" id="loginBtn" title="Войти через Telegram">
+        <i class="fab fa-telegram"></i>
+        ВОЙТИ
+      </button>
+    </div>
+
+    <!-- User Menu Container (hidden by default) -->
+    <div id="userMenu" style="position: fixed; top: 20px; right: 20px; display: none; gap: 10px; z-index: 999;">
+      <button class="auth-btn" id="cabinetBtn" title="Открыть кабинет">
+        <i class="fas fa-user"></i>
+      </button>
+      <button class="settings-btn" id="settingsBtn" style="width: 48px; padding: 12px 8px; font-size: 18px;" title="Настройки"><i class="fas fa-cog"></i></button>
+    </div>
 
     <!-- User Status Badge -->
     <div id="userStatusBadge" style="position: fixed; top: 20px; left: 20px; background: rgba(10, 14, 39, 0.8); padding: 10px 15px; border-radius: 8px; border: 2px solid #00f2fe; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); z-index: 1000; display: none;">
@@ -641,16 +721,16 @@
 
         <div class="buttons">
           <button id="findBtn">
-            → НАЙТИ СОБЕСЕДНИКА
+            <i class="fas fa-play"></i> НАЙТИ СОБЕСЕДНИКА
           </button>
           <button id="nextBtn" style="display:none;">
-            ⏭ СЛЕДУЮЩИЙ
+            <i class="fas fa-arrow-right"></i> СЛЕДУЮЩИЙ
           </button>
           <button id="muteBtn" style="display:none;">
-            🔊 МИК ВЫКЛ
+            <i class="fas fa-microphone-slash"></i> МИК ВЫКЛ
           </button>
           <button id="leaveBtn" style="display:none;">
-            × ЗАВЕРШИТЬ
+            <i class="fas fa-times"></i> ЗАВЕРШИТЬ
           </button>
         </div>
       </div>

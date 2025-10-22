@@ -6,3 +6,4 @@ node_modules/
 public_backup_old/
 logs/
 .DS_Store
+*.tar.gz
